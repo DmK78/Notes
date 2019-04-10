@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        itemTouchHelper.attachToRecyclerView(recyclerViewNotes);
+        itemTouchHelper.attachToRecyclerView(recyclerViewNotes) ;
     }
 
     private void remove(int position) {
