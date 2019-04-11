@@ -11,7 +11,7 @@ import java.util.List;
 
 @Dao
 public interface NotesDao {
-    @Query("SELECT * FROM notes ORDER BY dayOfWeek DESC")
+    @Query("SELECT * FROM notes ORDER BY dayOfWeek ASC")
     LiveData<List<Note>> getAllNotes();
 
     @Insert

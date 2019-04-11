@@ -2,6 +2,8 @@ package com.android.dmk78.notes;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -24,19 +26,20 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerViewNotes;
     private final ArrayList<Note> notes = new ArrayList<>();
     private NotesAdapter adapter;
-    private NotesDatabase database;
+    private MainViewModel viewModel;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
         }
-        database = NotesDatabase.getInstance(this);
-
         recyclerViewNotes = findViewById(R.id.recyclerViewNotes);
         getData();
 
@@ -73,8 +76,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void remove(int position) {
-        Note note = notes.get(position);
-        database.notesDao().deletNote(note);
+        Note note = adapter.getNotes().get(position);
+        viewModel.deleteNote(note);
+
 
     }
 
@@ -87,13 +91,11 @@ public class MainActivity extends AppCompatActivity {
     private void getData() {
 
 
-        LiveData<List<Note>> notesFromDB = database.notesDao().getAllNotes();
+        LiveData<List<Note>> notesFromDB = viewModel.getNotes();
         notesFromDB.observe(this, new Observer<List<Note>>() {
             @Override
             public void onChanged(@Nullable List<Note> notesFromLiveData) {
-                notes.clear();
-                notes.addAll(notesFromLiveData);
-                adapter.notifyDataSetChanged();
+              adapter.setNotes(notesFromLiveData);
             }
         });
 
