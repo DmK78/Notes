@@ -1,10 +1,13 @@
 package com.android.dmk78.notes;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,11 +18,13 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerViewNotes;
     private final ArrayList<Note> notes = new ArrayList<>();
     private NotesAdapter adapter;
+    private NotesDatabase database;
 
 
     @Override
@@ -27,13 +32,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ActionBar actionBar = getSupportActionBar();
-        if(actionBar!=null){
+        if (actionBar != null) {
             actionBar.hide();
         }
+        database = NotesDatabase.getInstance(this);
+
         recyclerViewNotes = findViewById(R.id.recyclerViewNotes);
-
-
-
+        getData();
 
         adapter = new NotesAdapter(notes);
         recyclerViewNotes.setLayoutManager(new LinearLayoutManager(this));
@@ -68,10 +73,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void remove(int position) {
-        int id = notes.get(position).getId();
+        Note note = notes.get(position);
+        database.notesDao().deletNote(note);
 
-
-        adapter.notifyDataSetChanged();
     }
 
     public void onClickAddNote(View view) {
@@ -80,7 +84,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void getData() {
 
+
+        LiveData<List<Note>> notesFromDB = database.notesDao().getAllNotes();
+        notesFromDB.observe(this, new Observer<List<Note>>() {
+            @Override
+            public void onChanged(@Nullable List<Note> notesFromLiveData) {
+                notes.clear();
+                notes.addAll(notesFromLiveData);
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+    }
 
 }
 
