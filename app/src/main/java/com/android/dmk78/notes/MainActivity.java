@@ -1,40 +1,42 @@
 package com.android.dmk78.notes;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerViewNotes;
-    public static final ArrayList<Note> notes = new ArrayList<>();
+    private final ArrayList<Note> notes = new ArrayList<>();
     NotesAdapter adapter;
+    private NotesDBHelper dbHelper;
+    private SQLiteDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        recyclerViewNotes = findViewById(R.id.recyclerViewNotes);
-        if (notes.isEmpty()) {
-            notes.add(new Note("Программировать", "писать код", "понедельник", 2));
-            notes.add(new Note("Парикмахер", "сходить к парикмахеру с делать прическу", "вторник", 2));
-            notes.add(new Note("Массаж", "сходить в Сиам", "среда", 1));
-            notes.add(new Note("Колеса", "Купить летние колеса", "четверг", 1));
-            notes.add(new Note("Театр", "Сходить в музкомедию", "пятница", 3));
-            notes.add(new Note("Дети", "Провести время с детьми", "воскресенье", 2));
-            notes.add(new Note("Массаж", "сходить в Сиам", "среда", 1));
-            notes.add(new Note("Колеса", "Купить летние колеса", "четверг", 1));
-            notes.add(new Note("Театр", "Сходить в музкомедию", "пятница", 3));
-            notes.add(new Note("Дети", "Провести время с детьми", "воскресенье", 2));
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar!=null){
+            actionBar.hide();
         }
+        recyclerViewNotes = findViewById(R.id.recyclerViewNotes);
+        dbHelper = new NotesDBHelper(this);
+        database = dbHelper.getWritableDatabase();
+        //database.delete(NotesContract.NotesEntry.TABLE_NAME,null,null);
+
+        getData();
         adapter = new NotesAdapter(notes);
         recyclerViewNotes.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewNotes.setAdapter(adapter);
@@ -51,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                 remove(position);
             }
         });
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.RIGHT|ItemTouchHelper.LEFT) {
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
                 return false;
@@ -64,11 +66,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        itemTouchHelper.attachToRecyclerView(recyclerViewNotes) ;
+        itemTouchHelper.attachToRecyclerView(recyclerViewNotes);
     }
 
     private void remove(int position) {
-        notes.remove(position);
+        int id = notes.get(position).getId();
+        String where = NotesContract.NotesEntry._ID + " =?";
+        String[] whereArgs = new String[]{Integer.toString(id)};
+        database.delete(NotesContract.NotesEntry.TABLE_NAME, where, whereArgs);
+        getData();
         adapter.notifyDataSetChanged();
     }
 
@@ -78,6 +84,24 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void getData() {
+        notes.clear();
+        String selection = NotesContract.NotesEntry.COLUMN_PRIORITY + " <?";
+        String[] selectionArgs = new String[]{"4"}; // можно выборать, какие замети не показывыать, по приоритету
+        Cursor cursor = database.query(NotesContract.NotesEntry.TABLE_NAME, null, selection, selectionArgs, null, null, NotesContract.NotesEntry.COLUMN_DAY_OF_WEEK);
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex(NotesContract.NotesEntry._ID));
+            String title = cursor.getString(cursor.getColumnIndex(NotesContract.NotesEntry.COLUMN_TITLE));
+            String description = cursor.getString(cursor.getColumnIndex(NotesContract.NotesEntry.COLUMN_DESCRIPTION));
+            int dayOfWeek = cursor.getInt(cursor.getColumnIndex(NotesContract.NotesEntry.COLUMN_DAY_OF_WEEK));
+            int priority = cursor.getInt(cursor.getColumnIndex(NotesContract.NotesEntry.COLUMN_PRIORITY));
+            Note note = new Note(id, title, description, dayOfWeek, priority);
+            notes.add(note);
+
+        }
+        cursor.close();
+
+    }
 
 }
 
