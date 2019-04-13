@@ -19,6 +19,7 @@
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
             android:text="TextView"
+            android:textStyle="bold"
             android:textColor="@android:color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
