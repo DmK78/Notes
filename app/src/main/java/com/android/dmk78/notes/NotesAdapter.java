@@ -1,5 +1,7 @@
 package com.android.dmk78.notes;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,6 +17,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     private List<Note> notes;
     private OnNoteClickListener onNoteClickListener;
+
 
     public NotesAdapter(ArrayList<Note> notes) {
         this.notes = notes;
@@ -41,6 +44,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         Note note = notes.get(i);
         notesViewHolder.textViewTitle.setText(note.getTitle());
         notesViewHolder.textViewDescription.setText(note.getDescription());
+        
         notesViewHolder.textViewDayOfWeek.setText("День недели: "+Note.getDayAsString(note.getDayOfWeek()+1));
         int colorId;
         int priority = note.getPriority();
