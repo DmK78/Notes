@@ -65,7 +65,8 @@ public class AddNoteActivity extends AppCompatActivity {
     }
 
     private boolean isFilled(String title, String description) {
-        return !title.isEmpty() && !description.isEmpty();
+        //return !title.isEmpty() && !description.isEmpty();
+        return !title.isEmpty(); // проверка на пустоту только TITLE
     }
 
 
