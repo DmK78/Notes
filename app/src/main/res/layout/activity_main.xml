@@ -26,7 +26,7 @@
         android:clickable="true"
         android:onClick="onClickAddNote"
         android:src="@drawable/ic_add_black_24dp"
-        app:backgroundTint="@android:color/black"
+        app:backgroundTint="@android:color/holo_blue_light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:maxImageSize="50dp"
