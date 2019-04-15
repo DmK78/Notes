@@ -27,10 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private final ArrayList<Note> notes = new ArrayList<>();
     private NotesAdapter adapter;
     private MainViewModel viewModel;
-///test
-///test1
-///test2
-//test3
+
 
 
     @Override
