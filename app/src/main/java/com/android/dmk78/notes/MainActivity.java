@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private final ArrayList<Note> notes = new ArrayList<>();
     private NotesAdapter adapter;
     private MainViewModel viewModel;
-//ttt
+///test
 
 
     @Override
